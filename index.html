@@ -110,7 +110,10 @@ h2{font-size:18px;font-weight:500;margin-bottom:1rem}
 </div>
 
 <div id="view-kanban" class="view">
-  <div class="toolbar"><button class="btn btn-primary" onclick="openJobModal()">+ Add job</button></div>
+  <div class="toolbar">
+    <button class="btn btn-primary" onclick="openJobModal()">+ Add job</button>
+    <button class="btn" onclick="openImportModal('jobs')">⬆ Import file</button>
+  </div>
   <div class="kanban" id="kanban-board"></div>
 </div>
 
