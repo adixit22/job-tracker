@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Job Search Tracker — Ashutosh Dixit</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,sans-serif;font-size:15px;color:#1a1a1a;background:#fff;padding:0 0 2rem}
@@ -67,6 +68,20 @@ h2{font-size:18px;font-weight:500;margin-bottom:1rem}
 .legend{display:flex;gap:16px;font-size:12px;margin-bottom:1rem;flex-wrap:wrap;color:#666}
 .legend-dot{width:10px;height:10px;border-radius:2px;display:inline-block;margin-right:4px}
 .search-input{padding:7px 12px;border:1px solid #ccc;border-radius:8px;font-size:13px;font-family:inherit;background:#fff;color:#1a1a1a;width:200px}
+.import-drop{border:2px dashed #ccc;border-radius:12px;padding:2rem;text-align:center;color:#666;font-size:13px;cursor:pointer;transition:border-color .2s}
+.import-drop:hover,.import-drop.drag-over{border-color:#378add;color:#0c447c;background:#f0f7ff}
+.import-drop input[type=file]{display:none}
+.import-preview{margin-top:1rem;max-height:220px;overflow-y:auto;font-size:12px}
+.import-preview table{width:100%;border-collapse:collapse}
+.import-preview th{background:#f5f5f5;padding:6px 8px;text-align:left;font-weight:500;position:sticky;top:0}
+.import-preview td{padding:5px 8px;border-bottom:1px solid #f0f0f0}
+.map-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px}
+.map-row label{width:140px;color:#666;flex-shrink:0}
+.map-row select{flex:1;font-size:13px;padding:5px 8px;border:1px solid #ccc;border-radius:6px;font-family:inherit}
+.step{display:none}.step.active{display:block}
+.step-indicator{display:flex;gap:6px;margin-bottom:1.25rem}
+.step-dot{width:8px;height:8px;border-radius:50%;background:#e5e5e5}
+.step-dot.active{background:#1a1a1a}
 </style>
 </head>
 <body>
@@ -102,6 +117,7 @@ h2{font-size:18px;font-weight:500;margin-bottom:1rem}
 <div id="view-list" class="view">
   <div class="toolbar">
     <button class="btn btn-primary" onclick="openJobModal()">+ Add job</button>
+    <button class="btn" onclick="openImportModal('jobs')">⬆ Import file</button>
     <select onchange="listFilterStage=this.value;renderList()" id="filter-stage"><option value="">All stages</option></select>
     <select onchange="listFilterCat=this.value;renderList()" id="filter-cat"><option value="">All industries</option></select>
   </div>
@@ -114,6 +130,7 @@ h2{font-size:18px;font-weight:500;margin-bottom:1rem}
 <div id="view-contacts" class="view">
   <div class="toolbar">
     <button class="btn btn-primary" onclick="openContactModal()">+ Add contact</button>
+    <button class="btn" onclick="openImportModal('contacts')">⬆ Import file</button>
     <input class="search-input" placeholder="Search contacts..." oninput="renderContacts(this.value)">
     <select onchange="contactFilterIndustry=this.value;renderContacts()" id="filter-industry"><option value="">All industries</option></select>
   </div>
@@ -131,6 +148,54 @@ h2{font-size:18px;font-weight:500;margin-bottom:1rem}
     <span><span class="legend-dot" style="background:#e5e5e5"></span>No date / future</span>
   </div>
   <div id="followup-list" style="margin-top:1rem"></div>
+</div>
+
+<!-- IMPORT MODAL -->
+<div class="modal-overlay" id="import-modal">
+  <div class="modal" style="width:min(600px,95vw)">
+    <div class="step-indicator">
+      <div class="step-dot active" id="sdot0"></div>
+      <div class="step-dot" id="sdot1"></div>
+      <div class="step-dot" id="sdot2"></div>
+    </div>
+
+    <!-- Step 0: Upload -->
+    <div class="step active" id="import-step-0">
+      <h3 id="import-modal-title">Import jobs</h3>
+      <p style="font-size:13px;color:#666;margin-bottom:1rem">Supports Excel (.xlsx, .xls) and CSV (.csv) files.</p>
+      <div class="import-drop" id="drop-zone" onclick="document.getElementById('file-input').click()"
+        ondragover="event.preventDefault();this.classList.add('drag-over')"
+        ondragleave="this.classList.remove('drag-over')"
+        ondrop="handleDrop(event)">
+        <div style="font-size:28px;margin-bottom:8px">📂</div>
+        <div style="font-weight:500;margin-bottom:4px">Click to browse or drag & drop</div>
+        <div style="font-size:12px">.xlsx · .xls · .csv</div>
+        <input type="file" id="file-input" accept=".xlsx,.xls,.csv" onchange="handleFileSelect(event)">
+      </div>
+      <div id="file-name" style="font-size:12px;color:#666;margin-top:8px;text-align:center"></div>
+    </div>
+
+    <!-- Step 1: Map columns -->
+    <div class="step" id="import-step-1">
+      <h3>Map your columns</h3>
+      <p style="font-size:13px;color:#666;margin-bottom:1rem">Match your file's columns to the tracker fields. Unmapped fields will be skipped.</p>
+      <div id="column-mapper"></div>
+      <div class="import-preview" id="import-preview"></div>
+    </div>
+
+    <!-- Step 2: Confirm -->
+    <div class="step" id="import-step-2">
+      <h3>Ready to import</h3>
+      <div id="import-summary" style="font-size:13px;color:#666;margin-bottom:1rem"></div>
+      <div class="import-preview" id="import-confirm-preview"></div>
+    </div>
+
+    <div class="form-actions" style="margin-top:1.25rem">
+      <button class="btn" onclick="closeImportModal()">Cancel</button>
+      <button class="btn" id="import-back-btn" onclick="importStep(currentImportStep-1)" style="display:none">Back</button>
+      <button class="btn btn-primary" id="import-next-btn" onclick="importNext()" disabled>Next</button>
+    </div>
+  </div>
 </div>
 
 <!-- JOB MODAL -->
