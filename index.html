@@ -197,6 +197,24 @@ const IMPORTED_CONTACTS=[
   {id:'i15',name:'Fatima Al-Rashid',company:'Ontario Public Service',industry:'Public Sector',role:'Senior Policy Advisor',linkedin:'https://www.linkedin.com/in/sample',lastContact:'2026-01-23',followup:'2026-01-30',notes:'Got a reply via LinkedIn. Potential opening in Q2.'},
 ];
 
+const IMPORTED_JOBS=[
+  {id:'j1',company:'Google',role:'Product Manager, Workspace',category:'IT',stage:'interview',date:'2026-02-10',followup:'2026-04-20',notes:'2 rounds done. Final round with VP scheduled.'},
+  {id:'j2',company:'TD Bank',role:'Senior Business Analyst',category:'Banking',stage:'phone',date:'2026-03-01',followup:'2026-04-22',notes:'Phone screen with HR went well. Waiting for technical round invite.'},
+  {id:'j3',company:'Deloitte',role:'Strategy Consultant',category:'Consulting',stage:'applied',date:'2026-03-15',followup:'2026-04-25',notes:'Applied via referral from Rachel. Strong fit with practice area.'},
+  {id:'j4',company:'Shopify',role:'Group Product Manager',category:'IT',stage:'applied',date:'2026-03-20',followup:'2026-04-28',notes:'Nina referred internally. Application under review.'},
+  {id:'j5',company:'RBC',role:'Digital Product Owner',category:'Banking',stage:'wishlist',date:'',followup:'',notes:'Great role. Waiting for right contact before applying.'},
+  {id:'j6',company:'McKinsey & Company',role:'Business Analyst',category:'Consulting',stage:'wishlist',date:'',followup:'',notes:'Tom Bakshi to refer once intake opens in May.'},
+  {id:'j7',company:'Microsoft',role:'Senior PM, Azure',category:'IT',stage:'offer',date:'2026-02-01',followup:'2026-04-19',notes:'Offer received! Evaluating comp package. Deadline April 22.'},
+  {id:'j8',company:'CIBC',role:'VP Innovation Lab',category:'Banking',stage:'applied',date:'2026-03-25',followup:'2026-04-30',notes:'Applied directly. Chris Andersen to put in a word.'},
+  {id:'j9',company:'EY',role:'Digital Transformation Lead',category:'Consulting',stage:'rejected',date:'2026-02-15',followup:'',notes:'Rejected after final round. Feedback: need more P&L experience.'},
+  {id:'j10',company:'Bell Canada',role:'Product Manager, 5G',category:'Telecommunications',stage:'phone',date:'2026-03-10',followup:'2026-04-21',notes:'First call scheduled with hiring manager next week.'},
+  {id:'j11',company:'Loblaw Digital',role:'Senior Manager, Digital Products',category:'CPG',stage:'interview',date:'2026-02-20',followup:'2026-04-23',notes:'Case study submitted. Waiting for debrief.'},
+  {id:'j12',company:'Accenture',role:'Technology Consulting Manager',category:'Consulting',stage:'rejected',date:'2026-01-20',followup:'',notes:'Moved forward with another candidate. Marcus to flag future openings.'},
+  {id:'j13',company:'Ontario Public Service',role:'Senior Policy Advisor',category:'Public Sector',stage:'applied',date:'2026-03-28',followup:'2026-05-01',notes:'Applied via Fatima referral. Government intake process — slow timeline expected.'},
+  {id:'j14',company:'WSP Global',role:'Program Director',category:'Engineering Services',stage:'wishlist',date:'',followup:'',notes:'Raj shared internal JD. Strong match. Applying next week.'},
+  {id:'j15',company:'Scotiabank',role:'Technical Program Manager',category:'Banking',stage:'interview',date:'2026-02-25',followup:'2026-04-24',notes:'Third round completed. Reference check initiated — very positive sign.'},
+];
+
 let jobs=[], contacts=[], editJobId=null, editContactId=null;
 let listFilterStage='', listFilterCat='', contactFilterIndustry='';
 let funnelChart=null, catChart=null;
@@ -224,7 +242,7 @@ function overdueLabel(dateStr){
 }
 
 function loadData(){
-  try{ const r=localStorage.getItem('jt_jobs'); if(r) jobs=JSON.parse(r); }catch(e){jobs=[];}
+  try{ const r=localStorage.getItem('jt_jobs'); if(r) jobs=JSON.parse(r); else jobs=[...IMPORTED_JOBS]; }catch(e){jobs=[...IMPORTED_JOBS];}
   try{ const r=localStorage.getItem('jt_contacts'); if(r) contacts=JSON.parse(r); else contacts=[...IMPORTED_CONTACTS]; }catch(e){contacts=[...IMPORTED_CONTACTS];}
   populateIndustryFilter();
   renderAll();
