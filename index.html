@@ -4,22 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Job Search Tracker — Ashutosh Dixit</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,sans-serif;font-size:15px;color:#1a1a1a;background:#fff;padding:0 0 2rem}
-h2{font-size:18px;font-weight:500;margin-bottom:1rem}
 .nav{display:flex;gap:4px;padding:1rem 1rem 0;border-bottom:1px solid #e5e5e5;margin-bottom:1.5rem;overflow-x:auto}
 .nav-btn{padding:8px 14px;border:none;background:none;cursor:pointer;font-size:14px;color:#666;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
 .nav-btn.active{color:#1a1a1a;border-bottom-color:#1a1a1a;font-weight:500}
-.view{display:none;padding:0 1rem}
-.view.active{display:block}
+.view{display:none;padding:0 1rem}.view.active{display:block}
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:1.5rem}
 .metric{background:#f5f5f5;border-radius:8px;padding:.75rem 1rem}
 .metric-label{font-size:12px;color:#666;margin-bottom:4px}
 .metric-val{font-size:22px;font-weight:500}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border:1px solid #ccc;border-radius:8px;background:transparent;cursor:pointer;font-size:13px;color:#1a1a1a;font-family:inherit}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border:1px solid #ccc;border-radius:8px;background:#fff;cursor:pointer;font-size:13px;color:#1a1a1a;font-family:inherit}
 .btn:hover{background:#f5f5f5}
 .btn-primary{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
 .btn-primary:hover{opacity:.85}
@@ -37,13 +33,12 @@ h2{font-size:18px;font-weight:500;margin-bottom:1rem}
 .overdue-high{background:#fff5f5;border-left:3px solid #e24b4a}
 .overdue-med{background:#fffbf0;border-left:3px solid #ef9f27}
 .kanban{display:flex;gap:12px;overflow-x:auto;padding-bottom:1rem}
-.kanban-col{min-width:180px;flex:1}
-.kanban-col-header{font-size:12px;font-weight:500;color:#666;padding:6px 0;margin-bottom:8px;border-bottom:1px solid #e5e5e5;display:flex;justify-content:space-between;align-items:center}
+.kanban-col{min-width:175px;flex:1}
+.kanban-col-header{font-size:12px;font-weight:500;color:#666;padding:6px 0;margin-bottom:8px;border-bottom:1px solid #e5e5e5;display:flex;justify-content:space-between}
 .kanban-card{background:#fff;border:1px solid #e5e5e5;border-radius:8px;padding:10px;margin-bottom:8px;cursor:pointer}
 .kanban-card:hover{border-color:#aaa}
-.kanban-card .company{font-weight:500;font-size:13px;margin-bottom:2px}
-.kanban-card .role{font-size:12px;color:#666}
-.kanban-card .meta{font-size:11px;margin-top:6px}
+.kanban-card .co{font-weight:500;font-size:13px;margin-bottom:2px}
+.kanban-card .ro{font-size:12px;color:#666}
 .list-table{width:100%;border-collapse:collapse;font-size:13px}
 .list-table th{text-align:left;padding:8px 10px;font-size:12px;font-weight:500;color:#666;border-bottom:1px solid #e5e5e5;white-space:nowrap}
 .list-table td{padding:8px 10px;border-bottom:1px solid #e5e5e5;vertical-align:middle}
@@ -53,35 +48,38 @@ h2{font-size:18px;font-weight:500;margin-bottom:1rem}
 .contact-card.overdue-high{border-left:3px solid #e24b4a}
 .contact-card.overdue-med{border-left:3px solid #ef9f27}
 .avatar{width:40px;height:40px;border-radius:50%;background:#e6f1fb;color:#0c447c;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;flex-shrink:0}
-.modal-overlay{display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,.85);z-index:1000;align-items:flex-start;justify-content:center;overflow-y:auto;padding:2rem 1rem}
+.toolbar{display:flex;gap:8px;align-items:center;margin-bottom:1rem;flex-wrap:wrap}
+.toolbar select{font-size:13px;padding:6px 10px;border-radius:8px;border:1px solid #ccc;background:#fff;color:#1a1a1a;font-family:inherit}
+.search-input{padding:7px 12px;border:1px solid #ccc;border-radius:8px;font-size:13px;font-family:inherit;background:#fff;color:#1a1a1a;width:180px}
+.followup-row{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 12px;border-radius:8px;margin-bottom:8px;border:1px solid #e5e5e5}
+.legend{display:flex;gap:16px;font-size:12px;margin-bottom:1rem;flex-wrap:wrap;color:#666}
+.legend-dot{width:10px;height:10px;border-radius:2px;display:inline-block;margin-right:4px}
+
+/* Modal */
+.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:9999;justify-content:center;align-items:flex-start;overflow-y:auto;padding:2rem 1rem}
 .modal-overlay.open{display:flex}
-.modal{background:#fff;border-radius:12px;padding:1.5rem;width:min(500px,92vw);border:1px solid #ccc;position:relative;z-index:1001;margin:auto;flex-shrink:0}
+.modal{background:#fff;border-radius:12px;padding:1.5rem;width:min(520px,94vw);border:1px solid #ddd;margin:auto;flex-shrink:0}
 .modal h3{margin-bottom:1rem;font-size:16px;font-weight:500}
 .form-row{margin-bottom:.75rem}
 .form-row label{display:block;font-size:12px;color:#666;margin-bottom:4px}
 .form-row input,.form-row select,.form-row textarea{width:100%;font-family:inherit;font-size:14px;padding:8px 10px;border:1px solid #ccc;border-radius:8px;background:#fff;color:#1a1a1a}
 .form-row textarea{height:70px;resize:vertical}
 .form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:1rem}
-.toolbar{display:flex;gap:8px;align-items:center;margin-bottom:1rem;flex-wrap:wrap}
-.toolbar select{font-size:13px;padding:6px 10px;border-radius:8px;border:1px solid #ccc;background:#fff;color:#1a1a1a;font-family:inherit}
-.followup-row{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 12px;border-radius:8px;margin-bottom:8px;border:1px solid #e5e5e5}
-.legend{display:flex;gap:16px;font-size:12px;margin-bottom:1rem;flex-wrap:wrap;color:#666}
-.legend-dot{width:10px;height:10px;border-radius:2px;display:inline-block;margin-right:4px}
-.search-input{padding:7px 12px;border:1px solid #ccc;border-radius:8px;font-size:13px;font-family:inherit;background:#fff;color:#1a1a1a;width:200px}
-.import-drop{border:2px dashed #ccc;border-radius:12px;padding:2rem;text-align:center;color:#666;font-size:13px;cursor:pointer;transition:border-color .2s}
-.import-drop:hover,.import-drop.drag-over{border-color:#378add;color:#0c447c;background:#f0f7ff}
-.import-drop input[type=file]{display:none}
-.import-preview{margin-top:1rem;max-height:220px;overflow-y:auto;font-size:12px}
-.import-preview table{width:100%;border-collapse:collapse}
-.import-preview th{background:#f5f5f5;padding:6px 8px;text-align:left;font-weight:500;position:sticky;top:0}
-.import-preview td{padding:5px 8px;border-bottom:1px solid #f0f0f0}
-.map-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px}
-.map-row label{width:140px;color:#666;flex-shrink:0}
-.map-row select{flex:1;font-size:13px;padding:5px 8px;border:1px solid #ccc;border-radius:6px;font-family:inherit}
+
+/* Import modal specific */
+.drop-zone{border:2px dashed #ccc;border-radius:10px;padding:2rem;text-align:center;cursor:pointer;color:#666;transition:all .2s;background:#fafafa}
+.drop-zone:hover,.drop-zone.over{border-color:#378add;background:#f0f7ff;color:#0c447c}
 .step{display:none}.step.active{display:block}
-.step-indicator{display:flex;gap:6px;margin-bottom:1.25rem}
-.step-dot{width:8px;height:8px;border-radius:50%;background:#e5e5e5}
-.step-dot.active{background:#1a1a1a}
+.step-bar{display:flex;gap:6px;margin-bottom:1.25rem}
+.step-dot{width:8px;height:8px;border-radius:50%;background:#e5e5e5;transition:background .2s}
+.step-dot.on{background:#1a1a1a}
+.map-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.map-row label{width:130px;font-size:13px;color:#555;flex-shrink:0}
+.map-row select{flex:1;font-size:13px;padding:5px 8px;border:1px solid #ccc;border-radius:6px;font-family:inherit;background:#fff}
+.preview-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:.5rem}
+.preview-table th{background:#f5f5f5;padding:5px 8px;text-align:left;font-weight:500;position:sticky;top:0;border-bottom:1px solid #e5e5e5}
+.preview-table td{padding:4px 8px;border-bottom:1px solid #f0f0f0}
+.preview-wrap{max-height:180px;overflow-y:auto;border:1px solid #e5e5e5;border-radius:8px;margin-top:.75rem}
 </style>
 </head>
 <body>
@@ -94,33 +92,32 @@ h2{font-size:18px;font-weight:500;margin-bottom:1rem}
   <button class="nav-btn" onclick="showView('followups',this)">Follow-ups</button>
 </nav>
 
+<!-- DASHBOARD -->
 <div id="view-dashboard" class="view active">
   <div class="metrics" id="metrics"></div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:1.5rem">
-    <div>
-      <p style="font-size:13px;color:#666;margin-bottom:.5rem">Application funnel</p>
-      <div style="position:relative;height:220px"><canvas id="funnelChart" role="img" aria-label="Application funnel by stage"></canvas></div>
-    </div>
-    <div>
-      <p style="font-size:13px;color:#666;margin-bottom:.5rem">Contacts by industry</p>
-      <div style="position:relative;height:220px"><canvas id="catChart" role="img" aria-label="Contacts by industry"></canvas></div>
-    </div>
+    <div><p style="font-size:13px;color:#666;margin-bottom:.5rem">Application funnel</p>
+      <div style="position:relative;height:220px"><canvas id="funnelChart" role="img" aria-label="Funnel"></canvas></div></div>
+    <div><p style="font-size:13px;color:#666;margin-bottom:.5rem">Contacts by industry</p>
+      <div style="position:relative;height:220px"><canvas id="catChart" role="img" aria-label="Industry"></canvas></div></div>
   </div>
   <div id="dash-followups"></div>
 </div>
 
+<!-- KANBAN -->
 <div id="view-kanban" class="view">
   <div class="toolbar">
     <button class="btn btn-primary" onclick="openJobModal()">+ Add job</button>
-    <button class="btn" onclick="openImportModal('jobs')">⬆ Import file</button>
+    <button class="btn" id="btn-import-kanban" onclick="openImportModal('jobs')">⬆ Import file</button>
   </div>
   <div class="kanban" id="kanban-board"></div>
 </div>
 
+<!-- ALL JOBS -->
 <div id="view-list" class="view">
   <div class="toolbar">
     <button class="btn btn-primary" onclick="openJobModal()">+ Add job</button>
-    <button class="btn" onclick="openImportModal('jobs')">⬆ Import file</button>
+    <button class="btn" id="btn-import-list" onclick="openImportModal('jobs')">⬆ Import file</button>
     <select onchange="listFilterStage=this.value;renderList()" id="filter-stage"><option value="">All stages</option></select>
     <select onchange="listFilterCat=this.value;renderList()" id="filter-cat"><option value="">All industries</option></select>
   </div>
@@ -130,73 +127,71 @@ h2{font-size:18px;font-weight:500;margin-bottom:1rem}
   </table></div>
 </div>
 
+<!-- CONTACTS -->
 <div id="view-contacts" class="view">
   <div class="toolbar">
     <button class="btn btn-primary" onclick="openContactModal()">+ Add contact</button>
-    <button class="btn" onclick="openImportModal('contacts')">⬆ Import file</button>
+    <button class="btn" id="btn-import-contacts" onclick="openImportModal('contacts')">⬆ Import file</button>
     <input class="search-input" placeholder="Search contacts..." oninput="renderContacts(this.value)">
     <select onchange="contactFilterIndustry=this.value;renderContacts()" id="filter-industry"><option value="">All industries</option></select>
   </div>
   <div class="legend">
-    <span><span class="legend-dot" style="background:#e24b4a"></span>Follow-up 3+ weeks overdue</span>
-    <span><span class="legend-dot" style="background:#ef9f27"></span>Follow-up 2–3 weeks overdue</span>
+    <span><span class="legend-dot" style="background:#e24b4a"></span>3+ weeks overdue</span>
+    <span><span class="legend-dot" style="background:#ef9f27"></span>2–3 weeks overdue</span>
   </div>
   <div class="contact-grid" id="contact-grid"></div>
 </div>
 
+<!-- FOLLOW-UPS -->
 <div id="view-followups" class="view">
   <div class="legend" style="margin-top:.5rem">
     <span><span class="legend-dot" style="background:#e24b4a"></span>3+ weeks overdue</span>
     <span><span class="legend-dot" style="background:#ef9f27"></span>2–3 weeks overdue</span>
-    <span><span class="legend-dot" style="background:#e5e5e5"></span>No date / future</span>
   </div>
   <div id="followup-list" style="margin-top:1rem"></div>
 </div>
 
-<!-- IMPORT MODAL -->
+<!-- ===== IMPORT MODAL ===== -->
 <div class="modal-overlay" id="import-modal">
-  <div class="modal" style="width:min(600px,95vw)">
-    <div class="step-indicator">
-      <div class="step-dot active" id="sdot0"></div>
-      <div class="step-dot" id="sdot1"></div>
-      <div class="step-dot" id="sdot2"></div>
-    </div>
+  <div class="modal">
+    <div class="step-bar"><div class="step-dot on" id="sd0"></div><div class="step-dot" id="sd1"></div><div class="step-dot" id="sd2"></div></div>
 
-    <!-- Step 0: Upload -->
-    <div class="step active" id="import-step-0">
-      <h3 id="import-modal-title">Import jobs</h3>
-      <p style="font-size:13px;color:#666;margin-bottom:1rem">Supports Excel (.xlsx, .xls) and CSV (.csv) files.</p>
-      <div class="import-drop" id="drop-zone" onclick="document.getElementById('file-input').click()"
-        ondragover="event.preventDefault();this.classList.add('drag-over')"
-        ondragleave="this.classList.remove('drag-over')"
-        ondrop="handleDrop(event)">
-        <div style="font-size:28px;margin-bottom:8px">📂</div>
-        <div style="font-weight:500;margin-bottom:4px">Click to browse or drag & drop</div>
-        <div style="font-size:12px">.xlsx · .xls · .csv</div>
-        <input type="file" id="file-input" accept=".xlsx,.xls,.csv" onchange="handleFileSelect(event)">
+    <!-- Step 0: upload -->
+    <div class="step active" id="istep-0">
+      <h3 id="imp-title">Import jobs</h3>
+      <p style="font-size:13px;color:#666;margin-bottom:1rem">Drag & drop or click to upload. Supports .xlsx, .xls, .csv</p>
+      <div class="drop-zone" id="drop-zone"
+        ondragover="event.preventDefault();this.classList.add('over')"
+        ondragleave="this.classList.remove('over')"
+        ondrop="onDrop(event)"
+        onclick="document.getElementById('imp-file').click()">
+        <div style="font-size:32px;margin-bottom:8px">📂</div>
+        <div style="font-weight:500;margin-bottom:4px">Click to browse or drag & drop here</div>
+        <div style="font-size:12px;color:#999">.xlsx &nbsp;·&nbsp; .xls &nbsp;·&nbsp; .csv</div>
       </div>
-      <div id="file-name" style="font-size:12px;color:#666;margin-top:8px;text-align:center"></div>
+      <input type="file" id="imp-file" accept=".xlsx,.xls,.csv" style="display:none" onchange="onFileChange(event)">
+      <p id="imp-file-name" style="font-size:12px;color:#666;margin-top:8px;text-align:center;min-height:18px"></p>
     </div>
 
-    <!-- Step 1: Map columns -->
-    <div class="step" id="import-step-1">
+    <!-- Step 1: map -->
+    <div class="step" id="istep-1">
       <h3>Map your columns</h3>
-      <p style="font-size:13px;color:#666;margin-bottom:1rem">Match your file's columns to the tracker fields. Unmapped fields will be skipped.</p>
-      <div id="column-mapper"></div>
-      <div class="import-preview" id="import-preview"></div>
+      <p style="font-size:13px;color:#666;margin-bottom:1rem">Match your spreadsheet columns to tracker fields. Auto-matched where possible.</p>
+      <div id="mapper-rows"></div>
+      <div class="preview-wrap" id="imp-preview"></div>
     </div>
 
-    <!-- Step 2: Confirm -->
-    <div class="step" id="import-step-2">
-      <h3>Ready to import</h3>
-      <div id="import-summary" style="font-size:13px;color:#666;margin-bottom:1rem"></div>
-      <div class="import-preview" id="import-confirm-preview"></div>
+    <!-- Step 2: confirm -->
+    <div class="step" id="istep-2">
+      <h3>Confirm import</h3>
+      <p id="imp-summary" style="font-size:13px;color:#666;margin-bottom:.75rem"></p>
+      <div class="preview-wrap" id="imp-confirm"></div>
     </div>
 
-    <div class="form-actions" style="margin-top:1.25rem">
+    <div class="form-actions">
       <button class="btn" onclick="closeImportModal()">Cancel</button>
-      <button class="btn" id="import-back-btn" onclick="importStep(currentImportStep-1)" style="display:none">Back</button>
-      <button class="btn btn-primary" id="import-next-btn" onclick="importNext()" disabled>Next</button>
+      <button class="btn" id="imp-back" onclick="goImportStep(impStep-1)" style="display:none">Back</button>
+      <button class="btn btn-primary" id="imp-next" onclick="impNext()" disabled>Next</button>
     </div>
   </div>
 </div>
@@ -207,7 +202,7 @@ h2{font-size:18px;font-weight:500;margin-bottom:1rem}
     <h3 id="modal-title">Add job</h3>
     <div class="form-row"><label>Company *</label><input id="f-company" placeholder="e.g. Acme Corp"></div>
     <div class="form-row"><label>Role *</label><input id="f-role" placeholder="e.g. Product Manager"></div>
-    <div class="form-row"><label>Industry</label><input id="f-category" placeholder="e.g. Banking, IT, Consulting"></div>
+    <div class="form-row"><label>Industry</label><input id="f-category" placeholder="e.g. Banking, IT"></div>
     <div class="form-row"><label>Stage</label>
       <select id="f-stage"><option value="wishlist">Wishlist</option><option value="applied">Applied</option><option value="phone">Phone screen</option><option value="interview">Interview</option><option value="offer">Offer</option><option value="rejected">Rejected</option></select>
     </div>
@@ -230,7 +225,7 @@ h2{font-size:18px;font-weight:500;margin-bottom:1rem}
     <div class="form-row"><label>Industry</label><input id="c-industry"></div>
     <div class="form-row"><label>Role / Title</label><input id="c-role"></div>
     <div class="form-row"><label>LinkedIn / Contact</label><input id="c-linkedin"></div>
-    <div class="form-row"><label>Last contacted (date)</label><input type="date" id="c-lastcontact"></div>
+    <div class="form-row"><label>Last contacted</label><input type="date" id="c-lastcontact"></div>
     <div class="form-row"><label>Follow-up date</label><input type="date" id="c-followup"></div>
     <div class="form-row"><label>Notes</label><textarea id="c-notes"></textarea></div>
     <div class="form-actions">
@@ -240,90 +235,90 @@ h2{font-size:18px;font-weight:500;margin-bottom:1rem}
   </div>
 </div>
 
+<!-- Load libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
+/* ============================================================
+   DATA
+============================================================ */
 const STAGES=['wishlist','applied','phone','interview','offer','rejected'];
-const STAGE_LABELS={wishlist:'Wishlist',applied:'Applied',phone:'Phone screen',interview:'Interview',offer:'Offer',rejected:'Rejected'};
-const STAGE_BADGE={wishlist:'badge-wishlist',applied:'badge-applied',phone:'badge-phone',interview:'badge-interview',offer:'badge-offer',rejected:'badge-rejected'};
-const FUNNEL_COLORS=['#7f77dd','#378add','#ef9f27','#1d9e75','#639922','#e24b4a'];
+const SLABELS={wishlist:'Wishlist',applied:'Applied',phone:'Phone screen',interview:'Interview',offer:'Offer',rejected:'Rejected'};
+const SBADGE={wishlist:'badge-wishlist',applied:'badge-applied',phone:'badge-phone',interview:'badge-interview',offer:'badge-offer',rejected:'badge-rejected'};
+const FC=['#7f77dd','#378add','#ef9f27','#1d9e75','#639922','#e24b4a'];
 const TODAY=new Date(); TODAY.setHours(0,0,0,0);
 
-const IMPORTED_CONTACTS=[
-  {id:'i1',name:'Sarah Mitchell',company:'Royal Bank of Canada',industry:'Banking',role:'Senior Product Manager',linkedin:'https://www.linkedin.com/in/sample',lastContact:'2026-01-15',followup:'2026-01-28',notes:'Met at Ivey networking event. Open to referrals for PM roles.'},
-  {id:'i2',name:'James Thornton / Priya Mehta',company:'TD Bank',industry:'Banking',role:'Director, Digital Strategy',linkedin:'https://www.linkedin.com/in/sample',lastContact:'2026-02-01',followup:'2026-02-20',notes:'James connected on LinkedIn. Priya suggested reaching out in Q2.'},
-  {id:'i3',name:'Daniel Park',company:'Scotiabank',industry:'Banking',role:'Technical Program Manager',linkedin:'https://www.linkedin.com/in/sample',lastContact:'2026-01-10',followup:'',notes:'Spoke over phone. Vacancy expected in March.'},
-  {id:'i4',name:'Aisha Fernandez',company:'Google',industry:'IT',role:'Product Lead, Workspace',linkedin:'https://www.linkedin.com/in/sample',lastContact:'2026-01-20',followup:'2026-02-05',notes:'Coffee chat scheduled. Agreed to refer for APM program.'},
-  {id:'i5',name:'Kevin Liu',company:'Microsoft',industry:'IT',role:'Senior PM, Azure',linkedin:'https://www.linkedin.com/in/sample',lastContact:'2026-01-04',followup:'2026-01-18',notes:'CC done. Follow up with updated resume.'},
-  {id:'i6',name:'Rachel Okonkwo',company:'Deloitte',industry:'Consulting',role:'Manager, Strategy & Ops',linkedin:'https://www.linkedin.com/in/sample',lastContact:'2026-01-22',followup:'2026-02-10',notes:'Met at career fair. Warm connection, very helpful.'},
-  {id:'i7',name:'Tom Bakshi / Leila Nouri',company:'McKinsey & Company',industry:'Consulting',role:'Associate / Business Analyst',linkedin:'https://www.linkedin.com/in/sample',lastContact:'',followup:'2026-03-01',notes:'Tom reached out via alumni network. Leila may refer for BA role.'},
-  {id:'i8',name:'Chris Andersen',company:'CIBC',industry:'Banking',role:'VP, Innovation Lab',linkedin:'https://www.linkedin.com/in/sample',lastContact:'2026-01-19',followup:'',notes:'Pinged for connection. Role currently open on their team.'},
-  {id:'i9',name:'Nina Patel',company:'Shopify',industry:'IT',role:'Group Product Manager',linkedin:'https://www.linkedin.com/in/sample',lastContact:'2026-02-03',followup:'2026-02-25',notes:'Great conversation. Suggested applying for senior PM track in summer.'},
-  {id:'i10',name:'Omar Hassan',company:'EY',industry:'Consulting',role:'Senior Consultant, Digital',linkedin:'https://www.linkedin.com/in/sample',lastContact:'',followup:'2026-01-31',notes:'Agreed to coffee chat — need to reschedule.'},
-  {id:'i11',name:'Chloe Beaumont',company:'Bell Canada',industry:'Telecommunications',role:'Product Manager, 5G',linkedin:'https://www.linkedin.com/in/sample',lastContact:'',followup:'',notes:'Met at Western job fair. Stay in touch.'},
-  {id:'i12',name:'Raj Sharma',company:'WSP Global',industry:'Engineering Services',role:'Program Director',linkedin:'https://www.linkedin.com/in/sample',lastContact:'',followup:'',notes:'Gave personal contact immediately. Very approachable.'},
-  {id:'i13',name:'Lena Kozlov',company:'Loblaw Companies',industry:'CPG',role:'Senior Manager, Digital',linkedin:'https://www.linkedin.com/in/sample',lastContact:'2026-01-27',followup:'2026-02-15',notes:'Agreed to refer once a matching role opens.'},
-  {id:'i14',name:'Marcus Webb',company:'Accenture',industry:'Consulting',role:'Technology Consulting Lead',linkedin:'https://www.linkedin.com/in/sample',lastContact:'',followup:'',notes:'Had a coffee chat 3 months back. Should reconnect.'},
-  {id:'i15',name:'Fatima Al-Rashid',company:'Ontario Public Service',industry:'Public Sector',role:'Senior Policy Advisor',linkedin:'https://www.linkedin.com/in/sample',lastContact:'2026-01-23',followup:'2026-01-30',notes:'Got a reply via LinkedIn. Potential opening in Q2.'},
+const SEED_JOBS=[
+  {id:'j1',company:'Google',role:'Product Manager, Workspace',category:'IT',stage:'interview',date:'2026-02-10',followup:'2026-04-20',notes:'2 rounds done. Final round with VP scheduled.'},
+  {id:'j2',company:'TD Bank',role:'Senior Business Analyst',category:'Banking',stage:'phone',date:'2026-03-01',followup:'2026-04-22',notes:'Phone screen with HR went well.'},
+  {id:'j3',company:'Deloitte',role:'Strategy Consultant',category:'Consulting',stage:'applied',date:'2026-03-15',followup:'2026-04-25',notes:'Applied via referral from Rachel.'},
+  {id:'j4',company:'Shopify',role:'Group Product Manager',category:'IT',stage:'applied',date:'2026-03-20',followup:'2026-04-28',notes:'Nina referred internally.'},
+  {id:'j5',company:'RBC',role:'Digital Product Owner',category:'Banking',stage:'wishlist',date:'',followup:'',notes:'Waiting for right contact before applying.'},
+  {id:'j6',company:'McKinsey & Company',role:'Business Analyst',category:'Consulting',stage:'wishlist',date:'',followup:'',notes:'Tom Bakshi to refer once intake opens.'},
+  {id:'j7',company:'Microsoft',role:'Senior PM, Azure',category:'IT',stage:'offer',date:'2026-02-01',followup:'2026-04-19',notes:'Offer received! Evaluating comp. Deadline April 22.'},
+  {id:'j8',company:'CIBC',role:'VP Innovation Lab',category:'Banking',stage:'applied',date:'2026-03-25',followup:'2026-04-30',notes:'Applied directly. Chris to put in a word.'},
+  {id:'j9',company:'EY',role:'Digital Transformation Lead',category:'Consulting',stage:'rejected',date:'2026-02-15',followup:'',notes:'Rejected after final round.'},
+  {id:'j10',company:'Bell Canada',role:'Product Manager, 5G',category:'Telecommunications',stage:'phone',date:'2026-03-10',followup:'2026-04-21',notes:'First call with hiring manager next week.'},
+  {id:'j11',company:'Loblaw Digital',role:'Senior Manager, Digital Products',category:'CPG',stage:'interview',date:'2026-02-20',followup:'2026-04-23',notes:'Case study submitted. Waiting for debrief.'},
+  {id:'j12',company:'Accenture',role:'Technology Consulting Manager',category:'Consulting',stage:'rejected',date:'2026-01-20',followup:'',notes:'Moved forward with another candidate.'},
+  {id:'j13',company:'Ontario Public Service',role:'Senior Policy Advisor',category:'Public Sector',stage:'applied',date:'2026-03-28',followup:'2026-05-01',notes:'Applied via Fatima referral.'},
+  {id:'j14',company:'WSP Global',role:'Program Director',category:'Engineering Services',stage:'wishlist',date:'',followup:'',notes:'Strong match. Applying next week.'},
+  {id:'j15',company:'Scotiabank',role:'Technical Program Manager',category:'Banking',stage:'interview',date:'2026-02-25',followup:'2026-04-24',notes:'Third round completed. Reference check initiated.'},
 ];
 
-const IMPORTED_JOBS=[
-  {id:'j1',company:'Google',role:'Product Manager, Workspace',category:'IT',stage:'interview',date:'2026-02-10',followup:'2026-04-20',notes:'2 rounds done. Final round with VP scheduled.'},
-  {id:'j2',company:'TD Bank',role:'Senior Business Analyst',category:'Banking',stage:'phone',date:'2026-03-01',followup:'2026-04-22',notes:'Phone screen with HR went well. Waiting for technical round invite.'},
-  {id:'j3',company:'Deloitte',role:'Strategy Consultant',category:'Consulting',stage:'applied',date:'2026-03-15',followup:'2026-04-25',notes:'Applied via referral from Rachel. Strong fit with practice area.'},
-  {id:'j4',company:'Shopify',role:'Group Product Manager',category:'IT',stage:'applied',date:'2026-03-20',followup:'2026-04-28',notes:'Nina referred internally. Application under review.'},
-  {id:'j5',company:'RBC',role:'Digital Product Owner',category:'Banking',stage:'wishlist',date:'',followup:'',notes:'Great role. Waiting for right contact before applying.'},
-  {id:'j6',company:'McKinsey & Company',role:'Business Analyst',category:'Consulting',stage:'wishlist',date:'',followup:'',notes:'Tom Bakshi to refer once intake opens in May.'},
-  {id:'j7',company:'Microsoft',role:'Senior PM, Azure',category:'IT',stage:'offer',date:'2026-02-01',followup:'2026-04-19',notes:'Offer received! Evaluating comp package. Deadline April 22.'},
-  {id:'j8',company:'CIBC',role:'VP Innovation Lab',category:'Banking',stage:'applied',date:'2026-03-25',followup:'2026-04-30',notes:'Applied directly. Chris Andersen to put in a word.'},
-  {id:'j9',company:'EY',role:'Digital Transformation Lead',category:'Consulting',stage:'rejected',date:'2026-02-15',followup:'',notes:'Rejected after final round. Feedback: need more P&L experience.'},
-  {id:'j10',company:'Bell Canada',role:'Product Manager, 5G',category:'Telecommunications',stage:'phone',date:'2026-03-10',followup:'2026-04-21',notes:'First call scheduled with hiring manager next week.'},
-  {id:'j11',company:'Loblaw Digital',role:'Senior Manager, Digital Products',category:'CPG',stage:'interview',date:'2026-02-20',followup:'2026-04-23',notes:'Case study submitted. Waiting for debrief.'},
-  {id:'j12',company:'Accenture',role:'Technology Consulting Manager',category:'Consulting',stage:'rejected',date:'2026-01-20',followup:'',notes:'Moved forward with another candidate. Marcus to flag future openings.'},
-  {id:'j13',company:'Ontario Public Service',role:'Senior Policy Advisor',category:'Public Sector',stage:'applied',date:'2026-03-28',followup:'2026-05-01',notes:'Applied via Fatima referral. Government intake process — slow timeline expected.'},
-  {id:'j14',company:'WSP Global',role:'Program Director',category:'Engineering Services',stage:'wishlist',date:'',followup:'',notes:'Raj shared internal JD. Strong match. Applying next week.'},
-  {id:'j15',company:'Scotiabank',role:'Technical Program Manager',category:'Banking',stage:'interview',date:'2026-02-25',followup:'2026-04-24',notes:'Third round completed. Reference check initiated — very positive sign.'},
+const SEED_CONTACTS=[
+  {id:'c1',name:'Sarah Mitchell',company:'Royal Bank of Canada',industry:'Banking',role:'Senior Product Manager',linkedin:'https://linkedin.com',lastContact:'2026-01-15',followup:'2026-01-28',notes:'Met at Ivey networking event.'},
+  {id:'c2',name:'James Thornton',company:'TD Bank',industry:'Banking',role:'Director, Digital Strategy',linkedin:'https://linkedin.com',lastContact:'2026-02-01',followup:'2026-02-20',notes:'Connected on LinkedIn.'},
+  {id:'c3',name:'Daniel Park',company:'Scotiabank',industry:'Banking',role:'Technical Program Manager',linkedin:'https://linkedin.com',lastContact:'2026-01-10',followup:'',notes:'Vacancy expected in March.'},
+  {id:'c4',name:'Aisha Fernandez',company:'Google',industry:'IT',role:'Product Lead, Workspace',linkedin:'https://linkedin.com',lastContact:'2026-01-20',followup:'2026-02-05',notes:'Coffee chat done. Agreed to refer.'},
+  {id:'c5',name:'Kevin Liu',company:'Microsoft',industry:'IT',role:'Senior PM, Azure',linkedin:'https://linkedin.com',lastContact:'2026-01-04',followup:'2026-01-18',notes:'CC done. Follow up with updated resume.'},
+  {id:'c6',name:'Rachel Okonkwo',company:'Deloitte',industry:'Consulting',role:'Manager, Strategy & Ops',linkedin:'https://linkedin.com',lastContact:'2026-01-22',followup:'2026-02-10',notes:'Met at career fair. Warm connection.'},
+  {id:'c7',name:'Tom Bakshi',company:'McKinsey & Company',industry:'Consulting',role:'Associate',linkedin:'https://linkedin.com',lastContact:'',followup:'2026-03-01',notes:'Reached out via alumni network.'},
+  {id:'c8',name:'Chris Andersen',company:'CIBC',industry:'Banking',role:'VP, Innovation Lab',linkedin:'https://linkedin.com',lastContact:'2026-01-19',followup:'',notes:'Role currently open.'},
+  {id:'c9',name:'Nina Patel',company:'Shopify',industry:'IT',role:'Group Product Manager',linkedin:'https://linkedin.com',lastContact:'2026-02-03',followup:'2026-02-25',notes:'Suggested applying for senior PM track.'},
+  {id:'c10',name:'Omar Hassan',company:'EY',industry:'Consulting',role:'Senior Consultant, Digital',linkedin:'https://linkedin.com',lastContact:'',followup:'2026-01-31',notes:'Need to reschedule coffee chat.'},
+  {id:'c11',name:'Chloe Beaumont',company:'Bell Canada',industry:'Telecommunications',role:'Product Manager, 5G',linkedin:'https://linkedin.com',lastContact:'',followup:'',notes:'Met at Western job fair.'},
+  {id:'c12',name:'Raj Sharma',company:'WSP Global',industry:'Engineering Services',role:'Program Director',linkedin:'https://linkedin.com',lastContact:'',followup:'',notes:'Gave personal contact immediately.'},
+  {id:'c13',name:'Lena Kozlov',company:'Loblaw Companies',industry:'CPG',role:'Senior Manager, Digital',linkedin:'https://linkedin.com',lastContact:'2026-01-27',followup:'2026-02-15',notes:'Agreed to refer once role opens.'},
+  {id:'c14',name:'Marcus Webb',company:'Accenture',industry:'Consulting',role:'Technology Consulting Lead',linkedin:'https://linkedin.com',lastContact:'',followup:'',notes:'Had a coffee chat 3 months back.'},
+  {id:'c15',name:'Fatima Al-Rashid',company:'Ontario Public Service',industry:'Public Sector',role:'Senior Policy Advisor',linkedin:'https://linkedin.com',lastContact:'2026-01-23',followup:'2026-01-30',notes:'Potential opening in Q2.'},
 ];
 
 let jobs=[], contacts=[], editJobId=null, editContactId=null;
 let listFilterStage='', listFilterCat='', contactFilterIndustry='';
 let funnelChart=null, catChart=null;
 
-function daysDiff(dateStr){
-  if(!dateStr) return null;
-  const d=new Date(dateStr); d.setHours(0,0,0,0);
-  return Math.round((TODAY-d)/(1000*60*60*24));
+function daysDiff(ds){
+  if(!ds) return null;
+  const d=new Date(ds); d.setHours(0,0,0,0);
+  return Math.round((TODAY-d)/86400000);
 }
-function overdueClass(dateStr){
-  const d=daysDiff(dateStr);
-  if(d===null) return '';
-  if(d>=21) return 'overdue-high';
-  if(d>=14) return 'overdue-med';
-  return '';
-}
-function overdueLabel(dateStr){
-  const d=daysDiff(dateStr);
+function oCls(ds){ const d=daysDiff(ds); return d===null?'':d>=21?'overdue-high':d>=14?'overdue-med':''; }
+function oLbl(ds){
+  const d=daysDiff(ds);
   if(d===null) return '';
   if(d<0) return `<span style="color:#1d9e75;font-size:11px">Due in ${Math.abs(d)}d</span>`;
   if(d===0) return `<span style="color:#1d9e75;font-size:11px">Due today</span>`;
   if(d>=21) return `<span style="color:#a32d2d;font-size:11px;font-weight:500">${d}d overdue</span>`;
   if(d>=14) return `<span style="color:#ba7517;font-size:11px;font-weight:500">${d}d overdue</span>`;
-  return `<span style="color:#666;font-size:11px">${d}d ago</span>`;
+  return `<span style="color:#888;font-size:11px">${d}d ago</span>`;
 }
 
 function loadData(){
-  try{ const r=localStorage.getItem('jt_jobs'); if(r) jobs=JSON.parse(r); else jobs=[...IMPORTED_JOBS]; }catch(e){jobs=[...IMPORTED_JOBS];}
-  try{ const r=localStorage.getItem('jt_contacts'); if(r) contacts=JSON.parse(r); else contacts=[...IMPORTED_CONTACTS]; }catch(e){contacts=[...IMPORTED_CONTACTS];}
+  try{ const r=localStorage.getItem('jt_jobs'); jobs=r?JSON.parse(r):[...SEED_JOBS]; }catch(e){ jobs=[...SEED_JOBS]; }
+  try{ const r=localStorage.getItem('jt_contacts'); contacts=r?JSON.parse(r):[...SEED_CONTACTS]; }catch(e){ contacts=[...SEED_CONTACTS]; }
   populateIndustryFilter();
   renderAll();
 }
-function saveJobs(){ try{localStorage.setItem('jt_jobs',JSON.stringify(jobs));}catch(e){} }
-function saveContacts(){ try{localStorage.setItem('jt_contacts',JSON.stringify(contacts));}catch(e){} }
-function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,5); }
+function saveJobs(){ localStorage.setItem('jt_jobs',JSON.stringify(jobs)); }
+function saveContacts(){ localStorage.setItem('jt_contacts',JSON.stringify(contacts)); }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
 
 function populateIndustryFilter(){
-  const industries=[...new Set(contacts.map(c=>c.industry).filter(Boolean))].sort();
+  const inds=[...new Set(contacts.map(c=>c.industry).filter(Boolean))].sort();
   const sel=document.getElementById('filter-industry');
   while(sel.options.length>1) sel.remove(1);
-  industries.forEach(i=>{ const o=document.createElement('option'); o.value=i; o.textContent=i; sel.appendChild(o); });
+  inds.forEach(i=>{ const o=document.createElement('option'); o.value=i; o.textContent=i; sel.appendChild(o); });
 }
 
 function showView(v,btn){
@@ -331,215 +326,288 @@ function showView(v,btn){
   document.querySelectorAll('.nav-btn').forEach(el=>el.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
   btn.classList.add('active');
-  if(v==='dashboard') renderDashboard();
-  if(v==='kanban') renderKanban();
-  if(v==='list') renderList();
-  if(v==='contacts') renderContacts();
-  if(v==='followups') renderFollowups();
+  ({dashboard:renderDashboard,kanban:renderKanban,list:renderList,contacts:renderContacts,followups:renderFollowups})[v]?.();
 }
-
 function renderAll(){ renderDashboard(); renderKanban(); renderList(); renderContacts(); renderFollowups(); }
 
+/* ---- DASHBOARD ---- */
 function renderDashboard(){
-  const total=jobs.length, applied=jobs.filter(j=>j.stage!=='wishlist').length;
-  const interviews=jobs.filter(j=>j.stage==='interview'||j.stage==='phone').length;
-  const offers=jobs.filter(j=>j.stage==='offer').length;
-  const overdueC=contacts.filter(c=>{ const d=daysDiff(c.followup); return d!==null&&d>=14; }).length;
-  document.getElementById('metrics').innerHTML=`
-    <div class="metric"><div class="metric-label">Jobs tracked</div><div class="metric-val">${total}</div></div>
-    <div class="metric"><div class="metric-label">Applied</div><div class="metric-val">${applied}</div></div>
-    <div class="metric"><div class="metric-label">Interviews</div><div class="metric-val">${interviews}</div></div>
-    <div class="metric"><div class="metric-label">Offers</div><div class="metric-val">${offers}</div></div>
-    <div class="metric"><div class="metric-label">Contacts</div><div class="metric-val">${contacts.length}</div></div>
-    <div class="metric"><div class="metric-label">Overdue follow-ups</div><div class="metric-val" style="color:#a32d2d">${overdueC}</div></div>`;
+  const tot=jobs.length, app=jobs.filter(j=>j.stage!=='wishlist').length;
+  const iv=jobs.filter(j=>['interview','phone'].includes(j.stage)).length;
+  const of=jobs.filter(j=>j.stage==='offer').length;
+  const ov=contacts.filter(c=>{ const d=daysDiff(c.followup); return d!==null&&d>=14; }).length;
+  document.getElementById('metrics').innerHTML=[
+    ['Jobs tracked',tot],['Applied',app],['Interviews',iv],['Offers',of],['Contacts',contacts.length],['Overdue follow-ups',ov]
+  ].map(([l,v],i)=>`<div class="metric"><div class="metric-label">${l}</div><div class="metric-val"${i===5&&v?` style="color:#a32d2d"`:''}>${v}</div></div>`).join('');
 
   const counts=STAGES.map(s=>jobs.filter(j=>j.stage===s).length);
   if(funnelChart) funnelChart.destroy();
-  funnelChart=new Chart(document.getElementById('funnelChart'),{
-    type:'bar',data:{labels:STAGES.map(s=>STAGE_LABELS[s]),datasets:[{data:counts,backgroundColor:FUNNEL_COLORS,borderRadius:4}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}
-  });
+  funnelChart=new Chart(document.getElementById('funnelChart'),{type:'bar',
+    data:{labels:STAGES.map(s=>SLABELS[s]),datasets:[{data:counts,backgroundColor:FC,borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
 
   const ind={};
   contacts.forEach(c=>{ if(c.industry) ind[c.industry]=(ind[c.industry]||0)+1; });
-  const iKeys=Object.keys(ind).sort((a,b)=>ind[b]-ind[a]);
-  const iColors=['#378add','#7f77dd','#1d9e75','#ef9f27','#e24b4a','#d4537e','#888780','#5dcaa5','#f0997b'];
+  const ik=Object.keys(ind).sort((a,b)=>ind[b]-ind[a]);
+  const ic=['#378add','#7f77dd','#1d9e75','#ef9f27','#e24b4a','#d4537e','#888','#5dcaa5','#f0997b'];
   if(catChart) catChart.destroy();
-  if(iKeys.length){
-    catChart=new Chart(document.getElementById('catChart'),{
-      type:'doughnut',
-      data:{labels:iKeys,datasets:[{data:iKeys.map(k=>ind[k]),backgroundColor:iColors.slice(0,iKeys.length),borderWidth:0}]},
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:11}}}}}
-    });
-  }
+  if(ik.length) catChart=new Chart(document.getElementById('catChart'),{type:'doughnut',
+    data:{labels:ik,datasets:[{data:ik.map(k=>ind[k]),backgroundColor:ic.slice(0,ik.length),borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:11}}}}}});
 
-  const overdue=contacts.filter(c=>{ const d=daysDiff(c.followup); return d!==null&&d>=14; })
-    .sort((a,b)=>daysDiff(b.followup)-daysDiff(a.followup)).slice(0,6);
-  const fu=document.getElementById('dash-followups');
-  fu.innerHTML=overdue.length
-    ? `<p style="font-size:13px;color:#666;margin-bottom:.75rem">Contacts needing follow-up (2+ weeks overdue)</p>`+
-      overdue.map(c=>`<div class="followup-row ${overdueClass(c.followup)}">
-        <div><span style="font-weight:500">${esc(c.name)}</span> <span style="color:#666;font-size:13px">@ ${esc(c.company)}</span></div>
-        <div>${overdueLabel(c.followup)}</div>
-      </div>`).join('')
-    : `<p style="color:#666;font-size:13px">No overdue follow-ups right now.</p>`;
+  const ods=contacts.filter(c=>{ const d=daysDiff(c.followup); return d!==null&&d>=14; }).sort((a,b)=>daysDiff(b.followup)-daysDiff(a.followup)).slice(0,6);
+  document.getElementById('dash-followups').innerHTML=ods.length
+    ?`<p style="font-size:13px;color:#666;margin-bottom:.75rem">Contacts needing follow-up (2+ weeks overdue)</p>`
+      +ods.map(c=>`<div class="followup-row ${oCls(c.followup)}"><div><span style="font-weight:500">${esc(c.name)}</span> <span style="color:#666;font-size:13px">@ ${esc(c.company)}</span></div><div>${oLbl(c.followup)}</div></div>`).join('')
+    :`<p style="color:#666;font-size:13px">No overdue follow-ups.</p>`;
 }
 
+/* ---- KANBAN ---- */
 function renderKanban(){
-  document.getElementById('kanban-board').innerHTML=STAGES.map(stage=>{
-    const cols=jobs.filter(j=>j.stage===stage);
-    return `<div class="kanban-col">
-      <div class="kanban-col-header"><span>${STAGE_LABELS[stage]}</span><span style="font-size:11px">${cols.length}</span></div>
-      ${cols.map(j=>`<div class="kanban-card" onclick="openJobModal('${j.id}')">
-        <div class="company">${esc(j.company)}</div>
-        <div class="role">${esc(j.role)}</div>
-        <div class="meta"><span class="tag" style="font-size:10px">${esc(j.category||'')}</span></div>
-      </div>`).join('')}
-    </div>`;
+  document.getElementById('kanban-board').innerHTML=STAGES.map(s=>{
+    const cs=jobs.filter(j=>j.stage===s);
+    return `<div class="kanban-col"><div class="kanban-col-header"><span>${SLABELS[s]}</span><span>${cs.length}</span></div>`
+      +cs.map(j=>`<div class="kanban-card" onclick="openJobModal('${j.id}')"><div class="co">${esc(j.company)}</div><div class="ro">${esc(j.role)}</div><div style="margin-top:6px"><span class="tag" style="font-size:10px">${esc(j.category||'')}</span></div></div>`).join('')+'</div>';
   }).join('');
 }
 
+/* ---- LIST ---- */
 function renderList(){
-  const cats=[...new Set(jobs.map(j=>j.category).filter(Boolean))];
+  const cs=[...new Set(jobs.map(j=>j.category).filter(Boolean))];
   const fc=document.getElementById('filter-cat');
   while(fc.options.length>1) fc.remove(1);
-  cats.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; fc.appendChild(o); });
+  cs.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; fc.appendChild(o); });
   const fs=document.getElementById('filter-stage');
-  if(fs.options.length<=1) STAGES.forEach(s=>{ const o=document.createElement('option'); o.value=s; o.textContent=STAGE_LABELS[s]; fs.appendChild(o); });
-  const filtered=jobs.filter(j=>(!listFilterStage||j.stage===listFilterStage)&&(!listFilterCat||j.category===listFilterCat));
-  document.getElementById('list-body').innerHTML=filtered.length?filtered.map(j=>`
-    <tr>
-      <td style="font-weight:500">${esc(j.company)}</td>
-      <td>${esc(j.role)}</td>
-      <td><span class="tag">${esc(j.category||'—')}</span></td>
-      <td><span class="badge ${STAGE_BADGE[j.stage]}">${STAGE_LABELS[j.stage]}</span></td>
-      <td style="color:#666">${j.date||'—'}</td>
-      <td>${j.followup?overdueLabel(j.followup):'—'}</td>
-      <td style="white-space:nowrap">
-        <button class="btn btn-sm" onclick="openJobModal('${j.id}')">Edit</button>
-        <button class="btn btn-sm btn-danger" onclick="deleteJob('${j.id}')">Del</button>
-      </td>
-    </tr>`).join('')
-    :`<tr><td colspan="7" style="text-align:center;color:#666;padding:2rem">No jobs yet — add one!</td></tr>`;
+  if(fs.options.length<=1) STAGES.forEach(s=>{ const o=document.createElement('option'); o.value=s; o.textContent=SLABELS[s]; fs.appendChild(o); });
+  const f=jobs.filter(j=>(!listFilterStage||j.stage===listFilterStage)&&(!listFilterCat||j.category===listFilterCat));
+  document.getElementById('list-body').innerHTML=f.length
+    ?f.map(j=>`<tr><td style="font-weight:500">${esc(j.company)}</td><td>${esc(j.role)}</td><td><span class="tag">${esc(j.category||'—')}</span></td><td><span class="badge ${SBADGE[j.stage]}">${SLABELS[j.stage]}</span></td><td style="color:#666">${j.date||'—'}</td><td>${j.followup?oLbl(j.followup):'—'}</td><td style="white-space:nowrap"><button class="btn btn-sm" onclick="openJobModal('${j.id}')">Edit</button> <button class="btn btn-sm btn-danger" onclick="deleteJob('${j.id}')">Del</button></td></tr>`).join('')
+    :`<tr><td colspan="7" style="text-align:center;color:#666;padding:2rem">No jobs yet.</td></tr>`;
 }
 
+/* ---- CONTACTS ---- */
 function renderContacts(search=''){
   const q=(search||'').toLowerCase();
-  const filtered=contacts.filter(c=>
-    (!contactFilterIndustry||c.industry===contactFilterIndustry)&&
-    (!q||(c.name+c.company+c.industry+c.notes).toLowerCase().includes(q))
-  );
-  const grid=document.getElementById('contact-grid');
-  if(!filtered.length){ grid.innerHTML=`<p style="color:#666">No contacts found.</p>`; return; }
-  grid.innerHTML=filtered.map(c=>{
-    const initials=c.name.split(/[\s,/]+/).filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase();
-    return `<div class="contact-card ${overdueClass(c.followup)}">
+  const f=contacts.filter(c=>(!contactFilterIndustry||c.industry===contactFilterIndustry)&&(!q||(c.name+c.company+c.notes).toLowerCase().includes(q)));
+  const g=document.getElementById('contact-grid');
+  if(!f.length){ g.innerHTML=`<p style="color:#666">No contacts found.</p>`; return; }
+  g.innerHTML=f.map(c=>{
+    const ini=c.name.split(/[\s,/]+/).filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    return `<div class="contact-card ${oCls(c.followup)}">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-        <div class="avatar">${initials}</div>
-        <div>
-          <div style="font-weight:500;font-size:13px">${esc(c.name)}</div>
+        <div class="avatar">${ini}</div>
+        <div><div style="font-weight:500;font-size:13px">${esc(c.name)}</div>
           <div style="font-size:12px;color:#666">${esc(c.role||'')}${c.role&&c.company?' @ ':''}${esc(c.company||'')}</div>
           ${c.industry?`<span class="tag" style="font-size:10px;margin-top:3px">${esc(c.industry)}</span>`:''}
         </div>
       </div>
       ${c.linkedin&&c.linkedin.startsWith('http')?`<div style="font-size:11px;margin-bottom:4px"><a href="${esc(c.linkedin)}" target="_blank" style="color:#378add">LinkedIn</a></div>`:''}
       ${c.lastContact?`<div style="font-size:11px;color:#666">Last contact: ${c.lastContact}</div>`:''}
-      ${c.followup?`<div style="font-size:11px;margin-top:2px">Follow-up: ${c.followup} ${overdueLabel(c.followup)}</div>`:''}
-      ${c.notes?`<div style="font-size:12px;margin-top:8px;color:#666;border-top:1px solid #e5e5e5;padding-top:8px">${esc(c.notes)}</div>`:''}
+      ${c.followup?`<div style="font-size:11px;margin-top:2px">Follow-up: ${c.followup} ${oLbl(c.followup)}</div>`:''}
+      ${c.notes?`<div style="font-size:12px;margin-top:8px;color:#666;border-top:1px solid #eee;padding-top:8px">${esc(c.notes)}</div>`:''}
       <div style="margin-top:10px;display:flex;gap:6px">
         <button class="btn btn-sm" onclick="openContactModal('${c.id}')">Edit</button>
         <button class="btn btn-sm btn-danger" onclick="deleteContact('${c.id}')">Del</button>
-      </div>
-    </div>`;
+      </div></div>`;
   }).join('');
 }
 
+/* ---- FOLLOW-UPS ---- */
 function renderFollowups(){
-  const withDate=contacts.filter(c=>c.followup).map(c=>({...c,diff:daysDiff(c.followup)})).sort((a,b)=>b.diff-a.diff);
-  const noDate=contacts.filter(c=>!c.followup);
-  let html='';
-  if(withDate.length){
-    html+=withDate.map(c=>{
-      const cls=c.diff>=21?'overdue-high':c.diff>=14?'overdue-med':'';
-      return `<div class="followup-row ${cls}">
-        <div>
-          <span style="font-weight:500">${esc(c.name)}</span>
-          <span style="color:#666;font-size:13px"> @ ${esc(c.company)}</span>
-          ${c.industry?`<span class="tag" style="font-size:10px;margin-left:6px">${esc(c.industry)}</span>`:''}
-          ${c.notes?`<div style="font-size:12px;color:#666;margin-top:3px">${esc(c.notes.slice(0,80))}${c.notes.length>80?'…':''}</div>`:''}
-        </div>
-        <div style="text-align:right;white-space:nowrap;min-width:90px">
-          <div>${overdueLabel(c.followup)}</div>
-          <div style="font-size:11px;color:#666">${c.followup}</div>
-        </div>
-      </div>`;
-    }).join('');
-  }
-  if(noDate.length){
-    html+=`<p style="font-size:12px;color:#666;margin:1rem 0 .5rem">No follow-up date set (${noDate.length} contacts)</p>`;
-    html+=noDate.map(c=>`<div class="followup-row">
-      <div><span style="font-weight:500">${esc(c.name)}</span> <span style="color:#666;font-size:13px"> @ ${esc(c.company)}</span></div>
-      <button class="btn btn-sm" onclick="openContactModal('${c.id}')">Set date</button>
-    </div>`).join('');
-  }
+  const wd=contacts.filter(c=>c.followup).map(c=>({...c,diff:daysDiff(c.followup)})).sort((a,b)=>b.diff-a.diff);
+  const nd=contacts.filter(c=>!c.followup);
+  let html=wd.map(c=>{
+    const cl=c.diff>=21?'overdue-high':c.diff>=14?'overdue-med':'';
+    return `<div class="followup-row ${cl}"><div><span style="font-weight:500">${esc(c.name)}</span><span style="color:#666;font-size:13px"> @ ${esc(c.company)}</span>${c.industry?`<span class="tag" style="font-size:10px;margin-left:6px">${esc(c.industry)}</span>`:''}<div style="font-size:12px;color:#666;margin-top:3px">${esc((c.notes||'').slice(0,80))}</div></div><div style="text-align:right;white-space:nowrap;min-width:90px"><div>${oLbl(c.followup)}</div><div style="font-size:11px;color:#888">${c.followup}</div></div></div>`;
+  }).join('');
+  if(nd.length) html+=`<p style="font-size:12px;color:#999;margin:1rem 0 .5rem">No date set (${nd.length})</p>`+nd.map(c=>`<div class="followup-row"><div><span style="font-weight:500">${esc(c.name)}</span><span style="color:#666;font-size:13px"> @ ${esc(c.company)}</span></div><button class="btn btn-sm" onclick="openContactModal('${c.id}')">Set date</button></div>`).join('');
   document.getElementById('followup-list').innerHTML=html||'<p style="color:#666">No contacts yet.</p>';
 }
 
+/* ---- JOB MODAL ---- */
 function openJobModal(id=null){
   editJobId=id;
   const j=id?jobs.find(x=>x.id===id):null;
   document.getElementById('modal-title').textContent=id?'Edit job':'Add job';
-  document.getElementById('f-company').value=j?.company||'';
-  document.getElementById('f-role').value=j?.role||'';
-  document.getElementById('f-category').value=j?.category||'';
+  ['company','role','category','notes'].forEach(f=>document.getElementById('f-'+f).value=j?.[f]||'');
   document.getElementById('f-stage').value=j?.stage||'wishlist';
   document.getElementById('f-date').value=j?.date||'';
   document.getElementById('f-followup').value=j?.followup||'';
-  document.getElementById('f-notes').value=j?.notes||'';
   document.getElementById('job-modal').classList.add('open');
 }
 function closeJobModal(){ document.getElementById('job-modal').classList.remove('open'); editJobId=null; }
 function saveJob(){
-  const company=document.getElementById('f-company').value.trim();
-  const role=document.getElementById('f-role').value.trim();
-  if(!company||!role){ alert('Company and role are required.'); return; }
-  const data={company,role,category:document.getElementById('f-category').value.trim(),stage:document.getElementById('f-stage').value,date:document.getElementById('f-date').value,followup:document.getElementById('f-followup').value,notes:document.getElementById('f-notes').value.trim()};
-  if(editJobId){ const i=jobs.findIndex(j=>j.id===editJobId); jobs[i]={...jobs[i],...data}; }
-  else jobs.push({id:uid(),...data});
+  const co=document.getElementById('f-company').value.trim(), ro=document.getElementById('f-role').value.trim();
+  if(!co||!ro){ alert('Company and role are required.'); return; }
+  const d={company:co,role:ro,category:document.getElementById('f-category').value.trim(),stage:document.getElementById('f-stage').value,date:document.getElementById('f-date').value,followup:document.getElementById('f-followup').value,notes:document.getElementById('f-notes').value.trim()};
+  if(editJobId){ const i=jobs.findIndex(j=>j.id===editJobId); jobs[i]={...jobs[i],...d}; }
+  else jobs.push({id:uid(),...d});
   saveJobs(); closeJobModal(); renderAll();
 }
-function deleteJob(id){ if(!confirm('Delete this job?')) return; jobs=jobs.filter(j=>j.id!==id); saveJobs(); renderAll(); }
+function deleteJob(id){ if(!confirm('Delete?')) return; jobs=jobs.filter(j=>j.id!==id); saveJobs(); renderAll(); }
 
+/* ---- CONTACT MODAL ---- */
 function openContactModal(id=null){
   editContactId=id;
   const c=id?contacts.find(x=>x.id===id):null;
-  document.getElementById('c-name').value=c?.name||'';
-  document.getElementById('c-company').value=c?.company||'';
-  document.getElementById('c-industry').value=c?.industry||'';
-  document.getElementById('c-role').value=c?.role||'';
-  document.getElementById('c-linkedin').value=c?.linkedin||'';
+  ['name','company','industry','role','linkedin','notes'].forEach(f=>document.getElementById('c-'+f).value=c?.[f]||'');
   document.getElementById('c-lastcontact').value=c?.lastContact||'';
   document.getElementById('c-followup').value=c?.followup||'';
-  document.getElementById('c-notes').value=c?.notes||'';
   document.getElementById('contact-modal').classList.add('open');
 }
 function closeContactModal(){ document.getElementById('contact-modal').classList.remove('open'); editContactId=null; }
 function saveContact(){
   const name=document.getElementById('c-name').value.trim();
   if(!name){ alert('Name is required.'); return; }
-  const data={name,company:document.getElementById('c-company').value.trim(),industry:document.getElementById('c-industry').value.trim(),role:document.getElementById('c-role').value.trim(),linkedin:document.getElementById('c-linkedin').value.trim(),lastContact:document.getElementById('c-lastcontact').value,followup:document.getElementById('c-followup').value,notes:document.getElementById('c-notes').value.trim()};
-  if(editContactId){ const i=contacts.findIndex(c=>c.id===editContactId); contacts[i]={...contacts[i],...data}; }
-  else contacts.push({id:uid(),...data});
+  const d={name,company:document.getElementById('c-company').value.trim(),industry:document.getElementById('c-industry').value.trim(),role:document.getElementById('c-role').value.trim(),linkedin:document.getElementById('c-linkedin').value.trim(),lastContact:document.getElementById('c-lastcontact').value,followup:document.getElementById('c-followup').value,notes:document.getElementById('c-notes').value.trim()};
+  if(editContactId){ const i=contacts.findIndex(c=>c.id===editContactId); contacts[i]={...contacts[i],...d}; }
+  else contacts.push({id:uid(),...d});
   saveContacts(); populateIndustryFilter(); closeContactModal(); renderAll();
 }
-function deleteContact(id){ if(!confirm('Remove this contact?')) return; contacts=contacts.filter(c=>c.id!==id); saveContacts(); renderContacts(); }
+function deleteContact(id){ if(!confirm('Remove?')) return; contacts=contacts.filter(c=>c.id!==id); saveContacts(); renderContacts(); }
 
-document.getElementById('job-modal').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeJobModal(); });
-document.getElementById('contact-modal').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeContactModal(); });
+/* ---- OVERLAY CLOSE ---- */
+['job-modal','contact-modal','import-modal'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',e=>{ if(e.target===e.currentTarget) document.getElementById(id).classList.remove('open'); });
+});
+
+/* ============================================================
+   IMPORT
+============================================================ */
+let impType='jobs', impStep=0, impHeaders=[], impRows=[], impMapped=[];
+
+const JOB_FIELDS =  [{k:'company',l:'Company *'},{k:'role',l:'Role *'},{k:'category',l:'Industry'},{k:'stage',l:'Stage'},{k:'date',l:'Date applied'},{k:'followup',l:'Follow-up date'},{k:'notes',l:'Notes'}];
+const CON_FIELDS  =  [{k:'name',l:'Name *'},{k:'company',l:'Company'},{k:'industry',l:'Industry'},{k:'role',l:'Role / Title'},{k:'linkedin',l:'LinkedIn / Contact'},{k:'lastContact',l:'Last contacted'},{k:'followup',l:'Follow-up date'},{k:'notes',l:'Notes'}];
+
+function autoMatch(key, headers){
+  const k=key.toLowerCase();
+  return headers.findIndex(h=>{
+    const h2=h.toLowerCase();
+    if(k==='company') return h2.includes('company')||h2.includes('employer')||h2.includes('org');
+    if(k==='role') return h2.includes('role')||h2.includes('title')||h2.includes('position')||h2.includes('job');
+    if(k==='category'||k==='industry') return h2.includes('industry')||h2.includes('sector')||h2.includes('category')||h2.includes('function');
+    if(k==='stage') return h2.includes('stage')||h2.includes('status');
+    if(k==='date') return (h2.includes('applied')||h2.includes('date'))&&!h2.includes('follow')&&!h2.includes('last');
+    if(k==='followup') return h2.includes('follow')||h2.includes('next');
+    if(k==='lastcontact') return h2.includes('last')&&h2.includes('contact');
+    if(k==='notes') return h2.includes('note')||h2.includes('comment')||h2.includes('remark');
+    if(k==='name') return h2==='name'||h2.includes('contact name')||h2.includes('full name');
+    if(k==='linkedin') return h2.includes('linkedin')||h2.includes('url')||h2.includes('link');
+    return false;
+  });
+}
+
+function openImportModal(type){
+  impType=type;
+  impStep=0; impHeaders=[]; impRows=[]; impMapped=[];
+  document.getElementById('imp-title').textContent=type==='jobs'?'Import jobs':'Import contacts';
+  document.getElementById('imp-file').value='';
+  document.getElementById('imp-file-name').textContent='';
+  document.getElementById('drop-zone').classList.remove('over');
+  goImportStep(0);
+  document.getElementById('import-modal').classList.add('open');
+}
+function closeImportModal(){ document.getElementById('import-modal').classList.remove('open'); }
+
+function goImportStep(n){
+  impStep=n;
+  document.querySelectorAll('.step').forEach((el,i)=>el.classList.toggle('active',i===n));
+  document.querySelectorAll('.step-dot').forEach((el,i)=>el.classList.toggle('on',i===n));
+  document.getElementById('imp-back').style.display=n>0?'':'none';
+  const nb=document.getElementById('imp-next');
+  nb.textContent=n===2?'Import':'Next';
+  nb.disabled=n===0;
+}
+
+function onDrop(e){
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('over');
+  const f=e.dataTransfer.files[0];
+  if(f) readFile(f);
+}
+function onFileChange(e){ const f=e.target.files[0]; if(f) readFile(f); }
+
+function readFile(file){
+  const ext=file.name.split('.').pop().toLowerCase();
+  if(!['xlsx','xls','csv'].includes(ext)){ alert('Please upload an .xlsx, .xls, or .csv file.'); return; }
+  document.getElementById('imp-file-name').textContent='Reading '+file.name+'...';
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array',cellDates:true,raw:false,dateNF:'yyyy-mm-dd'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const json=XLSX.utils.sheet_to_json(ws,{header:1,raw:false,dateNF:'yyyy-mm-dd'});
+      const rows=json.filter(r=>Array.isArray(r)&&r.some(c=>c!==undefined&&String(c).trim()!==''));
+      if(!rows.length){ alert('File appears empty or unreadable.'); return; }
+      impHeaders=rows[0].map(h=>String(h||'').trim());
+      impRows=rows.slice(1).filter(r=>r.some(c=>c!==undefined&&String(c).trim()!==''));
+      document.getElementById('imp-file-name').textContent=`✓ ${file.name} — ${impRows.length} data rows found`;
+      buildMapper();
+      goImportStep(1);
+    }catch(err){
+      console.error(err);
+      alert('Could not read file. Please try saving as .csv and uploading again.');
+    }
+  };
+  reader.onerror=()=>alert('File read error. Please try again.');
+  reader.readAsArrayBuffer(file);
+}
+
+function buildMapper(){
+  const fields=impType==='jobs'?JOB_FIELDS:CON_FIELDS;
+  const opts='<option value="">— skip —</option>'+impHeaders.map((h,i)=>`<option value="${i}">${esc(h)}</option>`).join('');
+  document.getElementById('mapper-rows').innerHTML=fields.map(({k,l})=>{
+    const m=autoMatch(k,impHeaders);
+    const sel=opts.replace(m>=0?`value="${m}"`:'\x00',m>=0?`value="${m}" selected`:'\x00');
+    return `<div class="map-row"><label>${l}</label><select id="mp-${k}">${sel}</select></div>`;
+  }).join('');
+
+  const prev=impRows.slice(0,5);
+  document.getElementById('imp-preview').innerHTML=`<p style="font-size:11px;color:#999;padding:6px 8px 2px">Preview — first ${prev.length} rows</p>
+    <table class="preview-table"><thead><tr>${impHeaders.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead>
+    <tbody>${prev.map(r=>`<tr>${impHeaders.map((_,i)=>`<td>${esc(r[i]||'')}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+}
+
+function impNext(){
+  if(impStep===1){
+    const fields=impType==='jobs'?JOB_FIELDS:CON_FIELDS;
+    const mapping={};
+    fields.forEach(({k})=>{ const v=document.getElementById('mp-'+k)?.value; if(v!=='') mapping[k]=parseInt(v); });
+    if(!Object.keys(mapping).length){ alert('Please map at least one column before continuing.'); return; }
+
+    const reqKey=impType==='jobs'?'company':'name';
+    if(mapping[reqKey]===undefined){ alert(`Please map the "${impType==='jobs'?'Company *':'Name *'}" column — it is required.`); return; }
+
+    impMapped=impRows.map(r=>{
+      const obj={id:uid()};
+      fields.forEach(({k})=>{ obj[k]=mapping[k]!==undefined?String(r[mapping[k]]||'').trim():''; });
+      if(impType==='jobs'&&!obj.stage) obj.stage='wishlist';
+      return obj;
+    }).filter(o=>o[reqKey]&&o[reqKey].length>0);
+
+    if(!impMapped.length){ alert('No valid rows found. Make sure the required column has data.'); return; }
+
+    document.getElementById('imp-summary').textContent=`${impMapped.length} records ready to import. They will be added to your existing data.`;
+    const pf=impType==='jobs'?['company','role','category','stage']:['name','company','industry','followup'];
+    const pl=impType==='jobs'?{company:'Company',role:'Role',category:'Industry',stage:'Stage'}:{name:'Name',company:'Company',industry:'Industry',followup:'Follow-up'};
+    document.getElementById('imp-confirm').innerHTML=`<table class="preview-table"><thead><tr>${pf.map(f=>`<th>${pl[f]||f}</th>`).join('')}</tr></thead>
+      <tbody>${impMapped.slice(0,10).map(o=>`<tr>${pf.map(f=>`<td>${esc(o[f]||'—')}</td>`).join('')}</tr>`).join('')}
+      ${impMapped.length>10?`<tr><td colspan="${pf.length}" style="color:#999;text-align:center;padding:6px">…and ${impMapped.length-10} more</td></tr>`:''}</tbody></table>`;
+    goImportStep(2);
+
+  } else if(impStep===2){
+    if(impType==='jobs'){ jobs=[...jobs,...impMapped]; saveJobs(); }
+    else { contacts=[...contacts,...impMapped]; saveContacts(); populateIndustryFilter(); }
+    closeImportModal();
+    renderAll();
+    setTimeout(()=>alert(`✓ Successfully imported ${impMapped.length} ${impType}!`),100);
+  }
+}
 
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-loadData();
+/* ---- INIT ---- */
+window.addEventListener('load', loadData);
 </script>
 </body>
 </html>
